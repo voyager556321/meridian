@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Meridian
+GenericName=Agenda
+Comment=Google Calendar and Tasks for GNOME
+Exec=meridian
+Icon=meridian
+Terminal=false
+Type=Application
+Categories=Office;Calendar;GNOME;GTK;
+Keywords=calendar;tasks;google;agenda;gtd;
+StartupNotify=true
