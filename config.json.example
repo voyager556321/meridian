@@ -1,0 +1,7 @@
+{
+  "sync_interval_seconds": 90,
+  "window": {
+    "width": 920,
+    "height": 700
+  }
+}
