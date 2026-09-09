@@ -50,7 +50,7 @@ Architecture: $ARCH
 Installed-Size: $SIZE_KB
 Depends: python3 (>= 3.10), python3-gi, python3-requests, gir1.2-gtk-4.0, gir1.2-adw-1, gir1.2-secret-1, libgtk-4-1, libadwaita-1-0, libsecret-1-0
 Maintainer: Meridian contributors <hello@meridian.local>
-Homepage: https://github.com/YOUR_USER/meridian
+Homepage: https://github.com/voyager556321/meridian
 Description: Google Calendar and Tasks for GNOME
  Meridian is a local-first Libadwaita Today hub for Google Calendar and Tasks.
 EOF
