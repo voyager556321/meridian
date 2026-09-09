@@ -63,7 +63,6 @@ class SettingsDialog(Adw.PreferencesWindow):
             override_id = ""
         self._client_id = Adw.EntryRow(
             title="Custom Client ID",
-            subtitle="Leave blank for one-click Sign in",
             text=override_id,
         )
         self._client_secret = Adw.PasswordEntryRow(title="Custom Client secret")
