@@ -1,0 +1,49 @@
+# Maintainer: Meridian contributors
+# Local-first Google Calendar + Tasks for GNOME (Libadwaita)
+pkgname=meridian
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Google Calendar and Tasks in one Libadwaita Today window"
+arch=('any')
+# Replace with your public repo before uploading to the AUR:
+url="https://github.com/YOUR_USER/meridian"
+license=('GPL3')
+depends=(
+  'python'
+  'python-gobject'
+  'python-requests'
+  'gtk4'
+  'libadwaita'
+  'libsecret'
+  'gobject-introspection'
+)
+makedepends=()
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+# While the repo is private / untagged, build from a local tree instead:
+#   ./scripts/makepkg-local.sh
+
+package() {
+  local srcdir_app
+  if [[ -d "$srcdir/$pkgname-$pkgver" ]]; then
+    srcdir_app="$srcdir/$pkgname-$pkgver"
+  else
+    srcdir_app="$srcdir"
+  fi
+
+  install -d "$pkgdir/usr/lib/$pkgname"
+  install -m644 "$srcdir_app"/{main,ui,auth,config,db,secrets_store,oauth_defaults,google_calendar,google_tasks,sync_engine}.py \
+    "$pkgdir/usr/lib/$pkgname/"
+
+  install -d "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/meridian" <<'EOF'
+#!/bin/bash
+exec /usr/bin/python3 /usr/lib/meridian/main.py "$@"
+EOF
+  chmod 755 "$pkgdir/usr/bin/meridian"
+
+  install -Dm644 "$srcdir_app/meridian.desktop" \
+    "$pkgdir/usr/share/applications/meridian.desktop"
+  install -Dm644 "$srcdir_app/data/icons/hicolor/scalable/apps/meridian.svg" \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/meridian.svg"
+}

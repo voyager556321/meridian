@@ -45,22 +45,37 @@ BUNDLED_CLIENT_SECRET = "GOCSPX-xxxx"
 
 ---
 
-## Install (Arch)
+## Install
+
+### Arch or Ubuntu (same flow)
 
 ```bash
-sudo pacman -S --needed python python-pip python-gobject gtk4 libadwaita \
-  gobject-introspection libsecret python-virtualenv
+./scripts/install-deps.sh   # pacman or apt
+./scripts/install.sh        # installs to ~/.local
+meridian
+```
 
-cd /path/to/meridian
-virtualenv --python=/usr/bin/python3 --system-site-packages .venv
-.venv/bin/pip install -r requirements.txt
-# edit oauth_defaults.py (maintainer)
+### Packages (share these — no Reddit needed)
+
+| Distro | Build | Install |
+|--------|--------|---------|
+| **Arch** | `./scripts/makepkg-local.sh` | `sudo pacman -U dist/meridian-*.pkg.tar.*` → later AUR |
+| **Ubuntu** | `./scripts/build-deb.sh` | `sudo apt install ./dist/meridian_*.deb` |
+
+Details: [`packaging/README.md`](packaging/README.md).
+
+Dev run from the repo:
+
+```bash
+./scripts/install-deps.sh
+# optional venv if system python-requests is missing:
+# virtualenv --python=/usr/bin/python3 --system-site-packages .venv && .venv/bin/pip install -r requirements.txt
 ./meridian
-# optional user install:
-./scripts/install.sh
 ```
 
 ## Next: promote & monetize
+
+Landing page: [`landing/`](landing/) — early-access waitlist + where to post for validation.
 
 MVP is the free core. Revenue focus after dogfooding:
 

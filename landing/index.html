@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian — Calendar + Tasks for GNOME</title>
+  <meta name="description" content="Meridian brings Google Calendar and Tasks into one local-first Libadwaita window. Sign in once. See today. Stay on Linux." />
+  <meta property="og:title" content="Meridian — Calendar + Tasks for GNOME" />
+  <meta property="og:description" content="Google Calendar and Tasks in one local-first GNOME app. No browser tabs. No GOA." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="meridian.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0c1b2a;
+      --ink-soft: #3a5166;
+      --paper: #f3f7fb;
+      --sky: #2b7de9;
+      --sky-deep: #154a8c;
+      --sun: #e8c547;
+      --line: rgba(12, 27, 42, 0.12);
+      --glass: rgba(255, 255, 255, 0.72);
+      --radius: 18px;
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Sora", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      align-items: end;
+      padding: 1.25rem clamp(1.25rem, 4vw, 3rem) clamp(2rem, 5vw, 3.5rem);
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(120% 80% at 70% 10%, #7eb6ff 0%, transparent 55%),
+        radial-gradient(90% 70% at 10% 90%, #cfe3ff 0%, transparent 50%),
+        linear-gradient(165deg, #d9e9fb 0%, #eef4fa 45%, #f7fafc 100%);
+    }
+
+    .hero-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(21, 74, 140, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(21, 74, 140, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 85%);
+      animation: gridDrift 28s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 48px 24px, 24px 48px; }
+    }
+
+    .sun {
+      position: absolute;
+      z-index: -1;
+      top: 8%;
+      right: 12%;
+      width: min(42vw, 320px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, #fff8d6 0%, var(--sun) 35%, transparent 70%);
+      opacity: 0.85;
+      filter: blur(2px);
+      animation: sunPulse 6s ease-in-out infinite;
+    }
+
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.95; }
+    }
+
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem clamp(1.25rem, 4vw, 3rem);
+      z-index: 2;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .brand-mark img { width: 36px; height: 36px; }
+    .brand-mark span { font-size: 1.05rem; }
+
+    .topbar nav {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+    }
+    .topbar nav a { text-decoration: none; }
+    .topbar nav a:hover { color: var(--ink); }
+
+    .hero-copy {
+      max-width: 36rem;
+      animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-hero {
+      font-family: var(--font-display);
+      font-size: clamp(3.4rem, 11vw, 6.5rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+      color: var(--sky-deep);
+      margin-bottom: 1rem;
+    }
+
+    .headline {
+      font-family: var(--font-display);
+      font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      max-width: 22ch;
+    }
+
+    .lede {
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      max-width: 34ch;
+      margin-bottom: 1.75rem;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: var(--sky-deep);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(21, 74, 140, 0.28);
+    }
+    .btn-primary:hover { background: #103a72; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.55);
+      border-color: var(--line);
+      color: var(--ink);
+      backdrop-filter: blur(8px);
+    }
+
+    .product-plane {
+      position: absolute;
+      z-index: -1;
+      right: clamp(-4rem, -2vw, 2rem);
+      bottom: clamp(1rem, 8vh, 5rem);
+      width: min(54vw, 560px);
+      animation: floatIn 1.1s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(40px) rotate(1.5deg); }
+      to { opacity: 1; transform: translateY(0) rotate(-1.5deg); }
+    }
+
+    .window {
+      background: var(--glass);
+      backdrop-filter: blur(18px) saturate(1.2);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 16px;
+      box-shadow:
+        0 30px 80px rgba(21, 74, 140, 0.18),
+        0 2px 0 rgba(255,255,255,0.8) inset;
+      overflow: hidden;
+      transform: rotate(-1.5deg);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.45);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #b8c7d6; }
+    .window-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+
+    .window-body { padding: 1rem 1.1rem 1.2rem; }
+    .section-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-soft);
+      margin: 0.6rem 0 0.45rem;
+      font-weight: 600;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 3.2rem 1fr;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(12, 27, 42, 0.06);
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .row time {
+      font-variant-numeric: tabular-nums;
+      color: var(--sky-deep);
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .row strong { display: block; font-weight: 600; letter-spacing: -0.01em; }
+    .row span { color: var(--ink-soft); font-size: 0.78rem; }
+    .check {
+      width: 1.05rem;
+      height: 1.05rem;
+      border: 2px solid var(--sky);
+      border-radius: 4px;
+      margin: 0 auto;
+    }
+    .check.done {
+      background: var(--sky);
+      box-shadow: inset 0 0 0 2px #fff;
+    }
+
+    .section {
+      padding: clamp(3.5rem, 8vw, 6rem) clamp(1.25rem, 4vw, 3rem);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+      max-width: 16ch;
+    }
+
+    .section > p {
+      color: var(--ink-soft);
+      max-width: 42ch;
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    .split {
+      display: grid;
+      gap: 1.5rem 2.5rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 820px) {
+      .split { grid-template-columns: 1fr 1fr; align-items: start; }
+      .product-plane { right: clamp(1rem, 6vw, 4rem); }
+    }
+    @media (max-width: 819px) {
+      .product-plane {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        width: min(100%, 420px);
+        margin: 2rem auto 0;
+        z-index: 0;
+      }
+      .hero {
+        align-items: start;
+        padding-top: 5.5rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero-copy { animation-delay: 0.05s; }
+    }
+
+    .point {
+      padding: 0.25rem 0 1.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .point:last-child { border-bottom: 0; padding-bottom: 0; }
+    .point h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+    }
+    .point p { color: var(--ink-soft); font-size: 0.95rem; max-width: 36ch; }
+
+    .waitlist {
+      background:
+        radial-gradient(80% 120% at 100% 0%, rgba(43, 125, 233, 0.18), transparent 55%),
+        linear-gradient(180deg, #e8f1fb, #f7fafc);
+      border-radius: calc(var(--radius) + 8px);
+      padding: clamp(1.75rem, 4vw, 2.75rem);
+      border: 1px solid rgba(21, 74, 140, 0.12);
+    }
+
+    .waitlist form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1.25rem;
+    }
+    .waitlist input[type="email"] {
+      flex: 1 1 220px;
+      min-width: 0;
+      padding: 0.9rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font: inherit;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+    }
+    .waitlist input:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.18);
+    }
+    .waitlist .hint {
+      margin-top: 0.85rem;
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+    }
+    .waitlist .ok {
+      display: none;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--sky-deep);
+    }
+    .waitlist.is-done form { display: none; }
+    .waitlist.is-done .ok { display: block; }
+
+    footer {
+      padding: 2rem clamp(1.25rem, 4vw, 3rem) 3rem;
+      color: var(--ink-soft);
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    footer a { text-decoration: none; }
+    footer a:hover { color: var(--ink); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero" id="top">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="sun" aria-hidden="true"></div>
+
+    <div class="topbar">
+      <a class="brand-mark" href="#top">
+        <img src="meridian.svg" alt="" width="36" height="36" />
+        <span>Meridian</span>
+      </a>
+      <nav>
+        <a href="#why">Why</a>
+        <a href="#early">Early access</a>
+      </nav>
+    </div>
+
+    <div class="hero-copy">
+      <p class="brand-hero">Meridian</p>
+      <h1 class="headline">Today’s calendar and tasks. One GNOME window.</h1>
+      <p class="lede">
+        Sign in with Google once. See events and tasks for today — local-first, Libadwaita, no browser tab marathon.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#early">Get early access</a>
+        <a class="btn btn-ghost" href="#why">See what it does</a>
+      </div>
+    </div>
+
+    <aside class="product-plane" aria-hidden="true">
+      <div class="window">
+        <div class="window-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <div class="window-title">Today · you@gmail.com</div>
+        </div>
+        <div class="window-body">
+          <div class="section-label">Events</div>
+          <div class="row">
+            <time>09:30</time>
+            <div><strong>Design review</strong><span>Meet · Room B</span></div>
+          </div>
+          <div class="row">
+            <time>14:00</time>
+            <div><strong>Dentist</strong><span>All day prep done</span></div>
+          </div>
+          <div class="section-label">Tasks</div>
+          <div class="row">
+            <div class="check"></div>
+            <div><strong>Ship Meridian MVP</strong><span>Due today</span></div>
+          </div>
+          <div class="row">
+            <div class="check done"></div>
+            <div><strong>Enable Tasks API</strong><span>Completed</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </header>
+
+  <section class="section" id="why">
+    <h2>Built for people who live in Google — and on Linux.</h2>
+    <p>
+      Browser Calendar + Tasks tabs work. They just don’t feel like a desktop. Meridian is the thin native layer in between.
+    </p>
+    <div class="split">
+      <div>
+        <div class="point">
+          <h3>Calendar and Tasks together</h3>
+          <p>One Today view. Complete a task without leaving the same window as your meetings.</p>
+        </div>
+        <div class="point">
+          <h3>Local-first, your machine</h3>
+          <p>SQLite cache, tokens in the system keyring. We are not building a sync SaaS that rents your agenda back to you.</p>
+        </div>
+        <div class="point">
+          <h3>GNOME-native chrome</h3>
+          <p>GTK4 + Libadwaita. Looks like it belongs next to your other apps — because it should.</p>
+        </div>
+      </div>
+      <div>
+        <div class="point">
+          <h3>One-click Google sign-in</h3>
+          <p>Browser OAuth, then you’re done. No Google Cloud Console for end users.</p>
+        </div>
+        <div class="point">
+          <h3>Free MVP now · Pro later</h3>
+          <p>Free: one account, Today, sync, quick-add. Pro (planned): multi-account and the paid unlock.</p>
+        </div>
+        <div class="point">
+          <h3>Honest about the audience</h3>
+          <p>If you only use Outlook or Apple Calendar, this isn’t for you. If Google + GNOME is your day, it is.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="early">
+    <div class="waitlist" id="waitlist">
+      <h2>Want this on your machine?</h2>
+      <p>
+        Leave an email if you’d try Meridian (or pay for multi-account later). That’s how we know it’s not only useful to its author.
+      </p>
+      <form id="waitlist-form" action="#" method="post">
+        <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email" />
+        <button class="btn btn-primary" type="submit">Join the list</button>
+      </form>
+      <p class="hint">
+        No spam. We’ll only write about builds and early access.
+        <!-- Wire Formspree / Buttondown: set data-endpoint on #waitlist-form -->
+      </p>
+      <p class="ok" role="status">You’re on the list. Thank you — that signal matters.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>© <span id="y"></span> Meridian · Linux · Google Calendar + Tasks</span>
+    <span>
+      <a href="https://github.com/" id="github-link" hidden>GitHub</a>
+      <a href="mailto:hello@meridian.local?subject=Meridian%20early%20access">Email the maker</a>
+    </span>
+  </footer>
+
+  <script>
+    document.getElementById("y").textContent = String(new Date().getFullYear());
+
+    const form = document.getElementById("waitlist-form");
+    const box = document.getElementById("waitlist");
+    // Optional: set to your Formspree / Getform / Buttondown endpoint
+    const ENDPOINT = form.dataset.endpoint || "";
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = new FormData(form).get("email");
+      if (!email) return;
+
+      const store = () => {
+        try {
+          const prev = JSON.parse(localStorage.getItem("meridian_waitlist") || "[]");
+          if (!prev.includes(email)) prev.push(email);
+          localStorage.setItem("meridian_waitlist", JSON.stringify(prev));
+        } catch (_) {}
+      };
+
+      if (ENDPOINT) {
+        try {
+          await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { Accept: "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+        } catch (_) {}
+      } else {
+        // Fallback: open mailto so you still capture intent while hosting statically
+        const subject = encodeURIComponent("Meridian waitlist");
+        const body = encodeURIComponent("Please add me to the Meridian early-access list.\n\nEmail: " + email);
+        window.location.href = "mailto:hello@meridian.local?subject=" + subject + "&body=" + body;
+      }
+
+      store();
+      box.classList.add("is-done");
+    });
+  </script>
+</body>
+</html>
