@@ -6,7 +6,7 @@ pkgrel=1
 pkgdesc="Google Calendar and Tasks in one Libadwaita Today window"
 arch=('any')
 # Replace with your public repo before uploading to the AUR:
-url="https://github.com/YOUR_USER/meridian"
+url="https://github.com/voyager556321/meridian"
 license=('GPL3')
 depends=(
   'python'

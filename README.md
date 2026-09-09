@@ -75,7 +75,9 @@ Dev run from the repo:
 
 ## Next: promote & monetize
 
-Landing page: [`landing/`](landing/) — early-access waitlist + where to post for validation.
+Landing page: [`landing/`](landing/) — early-access waitlist.
+
+**Site:** deploy `landing/` on Vercel (root directory = `landing`). Repo: [voyager556321/meridian](https://github.com/voyager556321/meridian).
 
 MVP is the free core. Revenue focus after dogfooding:
 

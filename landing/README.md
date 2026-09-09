@@ -20,13 +20,22 @@ Icon path: `meridian.svg` next to `index.html`.
 
 Until then, submit opens a mailto — fine for the first 10–20 people.
 
-## Deploy (pick one)
+## Deploy (Vercel)
 
-- **GitHub Pages**: push `landing/` (or copy to `docs/`) and enable Pages.
-- **Cloudflare Pages / Netlify**: drop the folder, zero config.
-- Custom domain later (`meridian.app` etc.) once the name is free.
+Repo is [voyager556321/meridian](https://github.com/voyager556321/meridian).
 
-## Where to promote (validation, not vanity)
+1. Import the GitHub repo in Vercel.
+2. Set **Root Directory** to `landing`.
+3. Framework: Other / no build command.
+4. Deploy → you get `*.vercel.app`. Add a custom domain in Project → Settings → Domains.
+
+CLI (from repo root):
+
+```bash
+npx vercel --cwd landing --prod
+```
+
+## Capture emails for real
 
 Goal: **emails + “I’d use/pay” replies**, not likes.
 
