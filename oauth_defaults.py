@@ -16,8 +16,8 @@ extractable from the Flatpak/desktop binary (standard for installed apps).
 from __future__ import annotations
 
 # Paste your Desktop OAuth client here (maintainer only):
-BUNDLED_CLIENT_ID = "269086083919-vg5bo48vdo987vc7vr6dfvruskffcdnr.apps.googleusercontent.com"
-BUNDLED_CLIENT_SECRET = "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"
+BUNDLED_CLIENT_ID = ""
+BUNDLED_CLIENT_SECRET = ""
 
 
 def bundled_client_id() -> str:
