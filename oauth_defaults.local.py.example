@@ -1,0 +1,5 @@
+"""Copy to oauth_defaults.local.py and fill in (gitignored)."""
+from __future__ import annotations
+
+BUNDLED_CLIENT_ID = "YOUR_DESKTOP_CLIENT_ID.apps.googleusercontent.com"
+BUNDLED_CLIENT_SECRET = "GOCSPX-YOUR_SECRET"

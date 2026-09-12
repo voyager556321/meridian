@@ -6,3 +6,6 @@ __pycache__/
 *.tmp
 .DS_Store
 dist/
+
+# Maintainer OAuth — never commit
+oauth_defaults.local.py

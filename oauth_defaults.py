@@ -1,30 +1,72 @@
 """Bundled Google OAuth Desktop client for Meridian.
 
-End users never see these fields — they only click "Sign in with Google".
+Public git must NOT contain real client secrets.
 
-Maintainer setup (once):
-  1. Google Cloud Console → create project "Meridian"
-  2. Enable Calendar API + Tasks API
-  3. OAuth consent screen → External → add test users while in Testing
-  4. Credentials → Create OAuth client → type **Desktop app**
-  5. Paste Client ID and Client secret below
+Resolution order for (client_id, client_secret):
+  1. Environment: MERIDIAN_GOOGLE_CLIENT_ID / MERIDIAN_GOOGLE_CLIENT_SECRET
+  2. Local override file oauth_defaults.local.py (gitignored) — for maintainers
+  3. Placeholders below (empty) — public clone without Sign-in until configured
 
-Do NOT commit real secrets to a public repo without accepting they are
-extractable from the Flatpak/desktop binary (standard for installed apps).
+Packaged releases inject credentials at build time from oauth_defaults.local.py
+into the install tree (desktop OAuth secrets are extractable from binaries anyway).
+
+Maintainer setup:
+  1. Google Cloud Console → Desktop OAuth client
+  2. cp oauth_defaults.local.py.example oauth_defaults.local.py
+  3. Paste Client ID + secret into the local file (chmod 600)
+  4. Optional: rotate secret in Google Cloud if it was ever committed/pushed
 """
 
 from __future__ import annotations
 
-# Paste your Desktop OAuth client here (maintainer only):
-BUNDLED_CLIENT_ID = "REMOVED_CLIENT_ID"
-BUNDLED_CLIENT_SECRET = "REMOVED_CLIENT_SECRET"
+import importlib.util
+import os
+from pathlib import Path
+
+# Public placeholders — keep empty in git.
+BUNDLED_CLIENT_ID = ""
+BUNDLED_CLIENT_SECRET = ""
+
+
+def _from_local_file() -> tuple[str, str]:
+    path = Path(__file__).resolve().parent / "oauth_defaults.local.py"
+    if not path.is_file():
+        return "", ""
+    spec = importlib.util.spec_from_file_location("oauth_defaults_local", path)
+    if spec is None or spec.loader is None:
+        return "", ""
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return (
+        str(getattr(mod, "BUNDLED_CLIENT_ID", "") or "").strip(),
+        str(getattr(mod, "BUNDLED_CLIENT_SECRET", "") or "").strip(),
+    )
+
+
+def _from_env() -> tuple[str, str]:
+    return (
+        (os.environ.get("MERIDIAN_GOOGLE_CLIENT_ID") or "").strip(),
+        (os.environ.get("MERIDIAN_GOOGLE_CLIENT_SECRET") or "").strip(),
+    )
 
 
 def bundled_client_id() -> str:
+    env_id, _ = _from_env()
+    if env_id:
+        return env_id
+    local_id, _ = _from_local_file()
+    if local_id:
+        return local_id
     return (BUNDLED_CLIENT_ID or "").strip()
 
 
 def bundled_client_secret() -> str:
+    _, env_secret = _from_env()
+    if env_secret:
+        return env_secret
+    _, local_secret = _from_local_file()
+    if local_secret:
+        return local_secret
     return (BUNDLED_CLIENT_SECRET or "").strip()
 
 
